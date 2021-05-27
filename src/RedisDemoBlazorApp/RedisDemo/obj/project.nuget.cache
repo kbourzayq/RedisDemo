@@ -1,0 +1,10 @@
+{
+  "version": 2,
+  "dgSpecHash": "PosDAcpGmQ4cpok3x/iOhllvUOiiMGQqQmU92HgThOc38PI9mnUbBpmB2I6eBovIdzRak8LLiYeyoKFFITe6hQ==",
+  "success": true,
+  "projectFilePath": "C:\\Users\\kbour\\source\\repos\\RedisDemo\\src\\RedisDemoBlazorApp\\RedisDemo\\RedisDemo.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\kbour\\.nuget\\packages\\microsoft.visualstudio.azure.containers.tools.targets\\1.10.13\\microsoft.visualstudio.azure.containers.tools.targets.1.10.13.nupkg.sha512"
+  ],
+  "logs": []
+}
