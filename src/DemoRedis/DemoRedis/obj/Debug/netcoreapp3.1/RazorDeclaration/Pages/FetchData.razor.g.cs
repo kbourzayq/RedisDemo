@@ -82,6 +82,20 @@ using DemoRedis.Data;
 #line default
 #line hidden
 #nullable disable
+#nullable restore
+#line 4 "C:\Users\kbour\source\repos\RedisDemo\src\DemoRedis\DemoRedis\Pages\FetchData.razor"
+using DemoRedis.Extensions;
+
+#line default
+#line hidden
+#nullable disable
+#nullable restore
+#line 5 "C:\Users\kbour\source\repos\RedisDemo\src\DemoRedis\DemoRedis\Pages\FetchData.razor"
+using Microsoft.Extensions.Caching.Distributed;
+
+#line default
+#line hidden
+#nullable disable
     [Microsoft.AspNetCore.Components.RouteAttribute("/fetchdata")]
     public partial class FetchData : Microsoft.AspNetCore.Components.ComponentBase
     {
@@ -91,18 +105,36 @@ using DemoRedis.Data;
         }
         #pragma warning restore 1998
 #nullable restore
-#line 39 "C:\Users\kbour\source\repos\RedisDemo\src\DemoRedis\DemoRedis\Pages\FetchData.razor"
+#line 57 "C:\Users\kbour\source\repos\RedisDemo\src\DemoRedis\DemoRedis\Pages\FetchData.razor"
        
-    private WeatherForecast[] forecasts;
+	private WeatherForecast[] forecasts;
+	private string _loadLocation = "";
+	private string _isCachedInfo = "";
 
-    protected override async Task OnInitializedAsync()
-    {
-        forecasts = await ForecastService.GetForecastAsync(DateTime.Now);
-    }
+	private async Task LoadData()
+	{
+		_isCachedInfo = "";
+		_loadLocation = null;
+		DateTime now = DateTime.Now;
+		string recordId = $"weatherfc_{now:ddMMyyy:HHmm}";
+		forecasts = await _cache.GetRecordAsync<WeatherForecast[]>(recordId);
+		if (forecasts is null)
+		{
+			forecasts = await ForecastService.GetForecastAsync(now);
+			_loadLocation = $"Data load from API at : {now}";
+			await _cache.SetRecordAsync<WeatherForecast[]>(recordId, forecasts);
+		}
+		else
+		{
+			_isCachedInfo = "text-danger";
+			_loadLocation = $"Data load from cache at : {now}";
+		}
+	}
 
 #line default
 #line hidden
 #nullable disable
+        [global::Microsoft.AspNetCore.Components.InjectAttribute] private IDistributedCache _cache { get; set; }
         [global::Microsoft.AspNetCore.Components.InjectAttribute] private WeatherForecastService ForecastService { get; set; }
     }
 }

@@ -29,6 +29,11 @@ namespace DemoRedis
 			services.AddRazorPages();
 			services.AddServerSideBlazor();
 			services.AddSingleton<WeatherForecastService>();
+
+			services.AddStackExchangeRedisCache(options => {
+				options.Configuration = Configuration.GetConnectionString("Redis");
+				options.InstanceName = "RedisDemo_";
+			});
 		}
 
 		// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

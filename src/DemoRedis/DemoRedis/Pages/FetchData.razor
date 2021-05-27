@@ -1,46 +1,81 @@
 ﻿@page "/fetchdata"
 
 @using DemoRedis.Data
+@using DemoRedis.Extensions
+@using Microsoft.Extensions.Caching.Distributed
 @inject WeatherForecastService ForecastService
+@inject IDistributedCache _cache;
 
 <h1>Weather forecast</h1>
 
 <p>This component demonstrates fetching data from a service.</p>
-
-@if (forecasts == null)
+<button class="btn btn-primary" @onclick="LoadData">Load data</button>
+@if(forecasts is null && _loadLocation == "")
 {
-    <p><em>Loading...</em></p>
+	
+		<p>
+			<em>
+				click button to load data...
+			</em>
+		</p>
+	
+}
+else if (forecasts is null)
+{
+	<p><em>Loading...</em></p>
 }
 else
 {
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Date</th>
-                <th>Temp. (C)</th>
-                <th>Temp. (F)</th>
-                <th>Summary</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var forecast in forecasts)
-            {
-                <tr>
-                    <td>@forecast.Date.ToShortDateString()</td>
-                    <td>@forecast.TemperatureC</td>
-                    <td>@forecast.TemperatureF</td>
-                    <td>@forecast.Summary</td>
-                </tr>
-            }
-        </tbody>
-    </table>
+	<div class="h3 @_isCachedInfo">
+		<em>
+			@_loadLocation
+		</em>
+	</div>
+	<table class="table">
+		<thead>
+			<tr>
+				<th>Date</th>
+				<th>Temp. (C)</th>
+				<th>Temp. (F)</th>
+				<th>Summary</th>
+			</tr>
+		</thead>
+		<tbody>
+			@foreach (var forecast in forecasts)
+			{
+				<tr>
+					<td>@forecast.Date.ToShortDateString()</td>
+					<td>@forecast.TemperatureC</td>
+					<td>@forecast.TemperatureF</td>
+					<td>@forecast.Summary</td>
+				</tr>
+			}
+		</tbody>
+	</table>
 }
 
 @code {
-    private WeatherForecast[] forecasts;
+	private WeatherForecast[] forecasts;
+	private string _loadLocation = "";
+	private string _isCachedInfo = "";
 
-    protected override async Task OnInitializedAsync()
-    {
-        forecasts = await ForecastService.GetForecastAsync(DateTime.Now);
-    }
+	private async Task LoadData()
+	{
+		_isCachedInfo = "";
+		_loadLocation = null;
+		DateTime now = DateTime.Now;
+		string recordId = $"weatherfc_{now:ddMMyyy:HHmm}";
+		forecasts = await _cache.GetRecordAsync<WeatherForecast[]>(recordId);
+		if (forecasts is null)
+		{
+			forecasts = await ForecastService.GetForecastAsync(now);
+			_loadLocation = $"Data load from API at : {now}";
+			await _cache.SetRecordAsync<WeatherForecast[]>(recordId, forecasts);
+		}
+		else
+		{
+			_isCachedInfo = "text-danger";
+			_loadLocation = $"Data load from cache at : {now}";
+		}
+	}
 }
