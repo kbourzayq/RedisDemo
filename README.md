@@ -1,2 +1,2 @@
 # RedisDemo
-This is a redis demo
+This is a redis demo using blazor server application
